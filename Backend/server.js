@@ -10,36 +10,31 @@ import userRoutes from "./routes/userRoutes.js";
 
 const app = express(); // ✅ CREATE APP FIRST
 
-// ✅ CORS MUST COME AFTER app IS CREATED
-import cors from "cors";
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow Postman / curl / server-side
+    if (!origin) return callback(null, true);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow Postman, curl, server-to-server
-      if (!origin) return callback(null, true);
+    // Allow localhost (dev)
+    if (origin.startsWith("http://localhost")) {
+      return callback(null, true);
+    }
 
-      // Allow localhost dev
-      if (origin.startsWith("http://localhost")) {
-        return callback(null, true);
-      }
+    // Allow ALL Vercel deployments (prod + preview)
+    if (origin.endsWith(".vercel.app")) {
+      return callback(null, true);
+    }
 
-      // Allow ALL Vercel deployments (prod + preview)
-      if (origin.endsWith(".vercel.app")) {
-        return callback(null, true);
-      }
+    // ❗ DO NOT throw error — just deny
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
-      // Block everything else
-      return callback(new Error("CORS not allowed"), false);
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
-
-// Handle preflight requests explicitly
-app.options("*", cors());
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // REQUIRED for preflight
 
 // ✅ Body parser
 app.use(express.json());
