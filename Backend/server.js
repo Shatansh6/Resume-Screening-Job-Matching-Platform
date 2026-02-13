@@ -13,7 +13,10 @@ const app = express(); // ✅ CREATE APP FIRST
 // ✅ CORS MUST COME AFTER app IS CREATED
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://resume-screening-job-matching-platf-pearl.vercel.app",
+    ],
     credentials: true,
   })
 );
