@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+:root {
+  --primary: 198 240 0;     /* #C6F000 */
+  --text-dark: 15 23 42;    /* slate-900 */
+  --text-muted: 100 116 139; /* slate-500 */
+}
+
+body {
+  background-color: rgb(249 250 251); /* #F9FAFB */
+  color: rgb(var(--text-dark));
+}
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.25s ease-out;
+}
