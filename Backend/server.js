@@ -11,19 +11,34 @@ import userRoutes from "./routes/userRoutes.js";
 const app = express(); // ✅ CREATE APP FIRST
 
 // ✅ CORS MUST COME AFTER app IS CREATED
+import cors from "cors";
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://resume-screening-job-matching-platf-pearl.vercel.app",
-    ],
+    origin: (origin, callback) => {
+      // Allow Postman, curl, server-to-server
+      if (!origin) return callback(null, true);
+
+      // Allow localhost dev
+      if (origin.startsWith("http://localhost")) {
+        return callback(null, true);
+      }
+
+      // Allow ALL Vercel deployments (prod + preview)
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      // Block everything else
+      return callback(new Error("CORS not allowed"), false);
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
+  }),
 );
 
-// explicitly handle preflight
+// Handle preflight requests explicitly
 app.options("*", cors());
 
 // ✅ Body parser
