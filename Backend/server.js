@@ -10,31 +10,13 @@ import userRoutes from "./routes/userRoutes.js";
 
 const app = express(); // ✅ CREATE APP FIRST
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow Postman / curl / server-side
-    if (!origin) return callback(null, true);
-
-    // Allow localhost (dev)
-    if (origin.startsWith("http://localhost")) {
-      return callback(null, true);
-    }
-
-    // Allow ALL Vercel deployments (prod + preview)
-    if (origin.endsWith(".vercel.app")) {
-      return callback(null, true);
-    }
-
-    // ❗ DO NOT throw error — just deny
-    return callback(null, false);
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // REQUIRED for preflight
+// ✅ CORS MUST COME AFTER app IS CREATED
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 // ✅ Body parser
 app.use(express.json());
