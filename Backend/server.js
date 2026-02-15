@@ -12,7 +12,17 @@ const app = express(); // ✅ CREATE APP FIRST
 // ✅ CORS MUST COME AFTER app IS CREATED
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (
+        !origin || // allows Postman / server-to-server
+        origin === "http://localhost:5173" ||
+        origin.endsWith(".vercel.app")
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
     credentials: true,
   })
 );
