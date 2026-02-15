@@ -93,7 +93,7 @@ export const getAllApplications = asyncHandler(async (req, res) => {
 export const updateApplicationStatus = asyncHandler(async (req, res) => {
   const { applicationId } = req.params;
   const { status } = req.body;
-if (!["Reviewed", "Rejected", "Selected"].includes(status)) {
+if (!["reviewed", "rejected", "selected"].includes(status)) {
     throw new ApiError(400, "Invalid status");
   }
 
@@ -115,8 +115,7 @@ export const getApplicationsByJob = asyncHandler(async (req, res) => {
   const { jobId } = req.params;
 
   const applications = await Application.find({ job: jobId })
-    .populate("user", "name email skills")
-    .populate("job", "title company")
+.populate("user", "name email skills experience")    .populate("job", "title company")
 
     // ⭐ AI sorting
     .sort({ matchPercentage: -1 });

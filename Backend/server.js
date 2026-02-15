@@ -1,7 +1,6 @@
 import "./config/env.js";
 import express from "express";
 import cors from "cors";
-
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";

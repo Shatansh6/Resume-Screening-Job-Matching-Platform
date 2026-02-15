@@ -16,8 +16,8 @@ const applicationSchema = new Schema(
 
     status: {
       type: String,
-      enum: ["Applied", "Reviewed", "Rejected", "Selected"],
-      default: "Applied",
+      enum: ["applied", "reviewed", "rejected", "selected"],
+      default: "applied",
     },
 
     // ⭐ Optional for old records

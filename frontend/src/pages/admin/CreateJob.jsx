@@ -17,33 +17,44 @@ export default function CreateJob() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = ({ target }) => {
+    const { name, value } = target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
+    const experience = Number(form.experience);
+    const skills = form.skillsRequired
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (experience < 0) {
+      setError("Experience must be a positive number");
+      return;
+    }
+
+    if (!skills.length) {
+      setError("Please enter at least one skill");
+      return;
+    }
+
     try {
       setLoading(true);
 
       await api.post("/jobs/create", {
-        title: form.title,
-        company: form.company,
-        location: form.location,
-        experience: Number(form.experience),
-        skillsRequired: form.skillsRequired
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
-        description: form.description,
+        title: form.title.trim(),
+        company: form.company.trim(),
+        location: form.location.trim(),
+        experience,
+        skillsRequired: skills,
+        description: form.description.trim(),
       });
 
-      navigate("/admin/jobs");
+      navigate("/admin/jobs", { replace: true });
     } catch (err) {
       setError(
         err.response?.data?.message || "Failed to create job"
@@ -54,79 +65,142 @@ export default function CreateJob() {
   };
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="text-2xl font-semibold mb-6">Create Job</h1>
+    <div className="px-6 flex-col">
+      {/* HEADER */}
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Create Job
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Add a new job opening
+          </p>
+        </div>
+      </div>
 
+      {/* FORM */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white border rounded-2xl p-6 space-y-5"
+        className="rounded-2xl border border-gray-200 bg-white p-8 shadow-md space-y-6"
       >
         {error && (
-          <p className="text-sm text-red-600">{error}</p>
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+            {error}
+          </div>
         )}
 
-        <input
-          name="title"
-          placeholder="Job Title"
-          value={form.title}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-2"
-          required
-        />
+        {/* JOB TITLE */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Job Title
+          </label>
+          <input
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Frontend Developer"
+            required
+            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+        </div>
 
-        <input
-          name="company"
-          placeholder="Company Name"
-          value={form.company}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-2"
-          required
-        />
+        {/* COMPANY */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Company Name
+          </label>
+          <input
+            name="company"
+            value={form.company}
+            onChange={handleChange}
+            placeholder="Acme Corp"
+            required
+            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+        </div>
 
-        <input
-          name="location"
-          placeholder="Location (Remote / City)"
-          value={form.location}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-2"
-          required
-        />
+        {/* LOCATION + EXPERIENCE */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Location
+            </label>
+            <input
+              name="location"
+              value={form.location}
+              onChange={handleChange}
+              placeholder="Remote / Bengaluru"
+              required
+              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            />
+          </div>
 
-        <input
-          type="number"
-          name="experience"
-          placeholder="Experience Required (years)"
-          value={form.experience}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-2"
-          required
-        />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Experience (years)
+            </label>
+            <input
+              type="number"
+              name="experience"
+              value={form.experience}
+              onChange={handleChange}
+              min="0"
+              required
+              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            />
+          </div>
+        </div>
 
-        <input
-          name="skillsRequired"
-          placeholder="Skills (comma separated)"
-          value={form.skillsRequired}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-2"
-          required
-        />
+        {/* SKILLS */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Required Skills
+          </label>
+          <input
+            name="skillsRequired"
+            value={form.skillsRequired}
+            onChange={handleChange}
+            placeholder="React, JavaScript, Tailwind"
+            required
+            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Separate skills with commas
+          </p>
+        </div>
 
-        <textarea
-          name="description"
-          placeholder="Job Description"
-          value={form.description}
-          onChange={handleChange}
-          className="w-full border rounded-lg px-4 py-2 h-32"
-          required
-        />
+        {/* DESCRIPTION */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Job Description
+          </label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            rows={5}
+            required
+            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          />
+        </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-6 py-2 rounded-full bg-black text-white disabled:opacity-50"
+        {/* ACTION */}
+        <div className="flex justify-end gap-3">
+          <button
+          type="button"
+          onClick={() => navigate("/admin/jobs")}
+          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
         >
-          {loading ? "Creating…" : "Create Job"}
+          Cancel
         </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded-lg bg-indigo-600 px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition"
+          >
+            {loading ? "Creating…" : "Create Job"}
+          </button>
+        </div>
       </form>
     </div>
   );
