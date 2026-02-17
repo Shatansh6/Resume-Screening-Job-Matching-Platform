@@ -69,10 +69,7 @@ export default function AllJobs() {
     setCurrentPage(1);
   }, [search, location, jobs]);
 
-  const totalPages = Math.ceil(
-    filteredJobs.length / JOBS_PER_PAGE
-  );
-
+  const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
   const startIndex = (currentPage - 1) * JOBS_PER_PAGE;
   const currentJobs = filteredJobs.slice(
     startIndex,
@@ -107,12 +104,17 @@ export default function AllJobs() {
     }
   };
 
-  /* ---------------- LOADING ---------------- */
+  /* ---------------- LOADING (SKELETON) ---------------- */
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-gray-500">
-        Loading jobs…
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="h-60 rounded-2xl bg-gray-100 animate-pulse"
+          />
+        ))}
       </div>
     );
   }
@@ -120,7 +122,7 @@ export default function AllJobs() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="max-w-7xl mx-auto px-6 space-y-5">
+    <div className="max-w-7xl mx-auto px-6 space-y-6 animate-fade-up">
       {/* SEARCH */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row gap-4">
         <input
@@ -142,52 +144,13 @@ export default function AllJobs() {
         />
       </div>
 
-      {/* EMPTY STATE (GOOD UX) */}
+      {/* EMPTY STATE */}
       {filteredJobs.length === 0 && (
-        <div className="py-15 text-center">
-          <h2 className="text-xl font-semibold text-gray-900">
-            No jobs found
-          </h2>
-
+        <div className="py-16 text-center animate-fade-up">
+          <h2 className="text-xl font-semibold">No jobs found</h2>
           <p className="text-sm text-gray-500 mt-2">
-            We couldn’t find jobs matching your search or location.
-            Try adjusting your filters.
+            Try adjusting your search or location filters.
           </p>
-
-          <div className="flex flex-wrap justify-center gap-3 mt-6">
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="px-4 py-2 border rounded-lg text-sm
-                           hover:bg-gray-100 transition"
-              >
-                Clear search
-              </button>
-            )}
-
-            {location && (
-              <button
-                onClick={() => setLocation("")}
-                className="px-4 py-2 border rounded-lg text-sm
-                           hover:bg-gray-100 transition"
-              >
-                Clear location
-              </button>
-            )}
-
-            {(search || location) && (
-              <button
-                onClick={() => {
-                  setSearch("");
-                  setLocation("");
-                }}
-                className="px-4 py-2 rounded-lg bg-black text-white
-                           text-sm hover:bg-gray-900 transition"
-              >
-                Reset filters
-              </button>
-            )}
-          </div>
         </div>
       )}
 
@@ -196,16 +159,18 @@ export default function AllJobs() {
         <>
           <div
             key={currentPage}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            {currentJobs.map((job) => (
+            {currentJobs.map((job, index) => (
               <div
                 key={job._id}
+                style={{ animationDelay: `${index * 0.08}s` }}
                 className="bg-white border border-gray-200 rounded-2xl p-6
-                           hover:shadow-md transition-shadow flex flex-col"
+                           flex flex-col hover:shadow-lg hover:-translate-y-0.5
+                           transition-all animate-fade-up"
               >
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold">
                     {job.title}
                   </h3>
 
@@ -262,7 +227,7 @@ export default function AllJobs() {
 
           {/* PAGINATION */}
           {totalPages > 1 && (
-            <div className="flex justify-center gap-2">
+            <div className="flex justify-center gap-2 pt-4">
               <button
                 onClick={() =>
                   setCurrentPage((p) => Math.max(p - 1, 1))

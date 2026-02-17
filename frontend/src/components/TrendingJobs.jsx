@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPublicJobs } from "../services/job.service";
 import { applyToJob } from "../services/application.service";
@@ -11,7 +11,10 @@ export default function TrendingJobs() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [applyingId, setApplyingId] = useState(null);
+  const sectionRef = useRef(null);
+  const [visible, setVisible] = useState(false);
 
+  // Fetch jobs
   useEffect(() => {
     const fetchJobs = async () => {
       try {
@@ -22,6 +25,22 @@ export default function TrendingJobs() {
       }
     };
     fetchJobs();
+  }, []);
+
+  // Reveal animation on scroll (ONCE)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
   }, []);
 
   const handleApply = async (jobId) => {
@@ -46,77 +65,94 @@ export default function TrendingJobs() {
     }
   };
 
-  if (loading) {
-    return (
-      <p className="text-center text-[rgb(var(--text-muted))]">
-        Loading trending jobs...
-      </p>
-    );
-  }
   const getCardBg = (index) => {
-    if (index === 0) return "bg-[rgb(234,248,200)]"; // soft green
-    if (index === 1) return "bg-[rgb(232,240,255)]"; // soft blue
-    if (index === 2) return "bg-[rgb(243,244,246)]"; // soft gray
+    if (index === 0) return "bg-[rgb(234,248,200)]";
+    if (index === 1) return "bg-[rgb(232,240,255)]";
+    if (index === 2) return "bg-[rgb(243,244,246)]";
     return "bg-white";
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-6 py-5">
+    <section
+      ref={sectionRef}
+      className="max-w-7xl mx-auto px-6 pt-8"
+    >
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div
+        className={`flex justify-between items-center mb-8 transition-all
+          ${visible ? "animate-fade-up" : "opacity-0"}`}
+      >
         <h3 className="text-xl font-semibold text-[rgb(var(--text-dark))]">
           Trending Jobs
         </h3>
 
         <button
           onClick={() => navigate("/jobs")}
-          className="text-sm text-[rgb(var(--text-dark))] hover:underline"
+          className="text-sm hover:underline"
         >
           See All Jobs
         </button>
       </div>
 
-      {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {jobs.map((job, index) => (
-  <div
-    key={job._id}
-    className={`rounded-2xl p-6 flex flex-col justify-between transition
-      ${getCardBg(index)} border border-transparent`}
-  >
-    <div>
-      <h4 className="font-semibold text-lg mb-1 text-[rgb(var(--text-dark))]">
-        {job.title}
-      </h4>
+      {/* Skeleton Loader */}
+      {loading && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="rounded-2xl p-6 h-56 bg-gray-100 animate-pulse"
+            />
+          ))}
+        </div>
+      )}
 
-      <p className="text-sm text-[rgb(var(--text-muted))] mb-3">
-        {job.company}
-      </p>
+      {/* Job Cards */}
+      {!loading && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {jobs.map((job, index) => (
+            <div
+              key={job._id}
+              className={`rounded-2xl p-6 flex flex-col justify-between
+                transition-all duration-300 border border-transparent
+                hover:-translate-y-1 hover:shadow-lg
+                ${getCardBg(index)}
+                ${visible ? "animate-fade-up" : "opacity-0"}`}
+              style={{ animationDelay: `${index * 0.15}s` }}
+            >
+              <div>
+                <h4 className="font-semibold text-lg mb-1">
+                  {job.title}
+                </h4>
 
-      <p className="text-sm text-[rgb(var(--text-muted))] line-clamp-3">
-        {job.description}
-      </p>
-    </div>
+                <p className="text-sm text-[rgb(var(--text-muted))] mb-3">
+                  {job.company}
+                </p>
 
-    <button
-      onClick={() => handleApply(job._id)}
-      disabled={applyingId === job._id}
-      className="mt-6 py-2 rounded-full border border-gray-300 text-black
-                 hover:bg-[rgb(var(--primary))] hover:border-transparent
-                 transition disabled:opacity-50"
-    >
-      {!user
-        ? "Login to Apply"
-        : !user.hasResume
-        ? "Upload Resume"
-        : applyingId === job._id
-        ? "Applying..."
-        : "Apply Now"}
-    </button>
-  </div>
-))}
+                <p className="text-sm text-[rgb(var(--text-muted))] line-clamp-3">
+                  {job.description}
+                </p>
+              </div>
 
-      </div>
+              <button
+                onClick={() => handleApply(job._id)}
+                disabled={applyingId === job._id}
+                className="mt-6 py-2 rounded-full border border-gray-300
+                           hover:bg-[rgb(var(--primary))]
+                           hover:border-transparent transition
+                           disabled:opacity-50"
+              >
+                {!user
+                  ? "Login to Apply"
+                  : !user.hasResume
+                  ? "Upload Resume"
+                  : applyingId === job._id
+                  ? "Applying..."
+                  : "Apply Now"}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

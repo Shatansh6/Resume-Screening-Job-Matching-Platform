@@ -20,13 +20,15 @@ export default function MyApplications() {
   const [page, setPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  /* ---------------- FETCH ---------------- */
+
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         const res = await api.get("/applications/my-applications");
         setApplications(res.data?.data || []);
-      } catch (err) {
-        console.error("Failed to fetch applications", err);
+      } catch {
+        // silent fail handled by empty state
       } finally {
         setLoading(false);
       }
@@ -34,10 +36,13 @@ export default function MyApplications() {
     fetchApplications();
   }, []);
 
-  // Reset pagination on search/filter change
+  /* ---------------- RESET PAGE ---------------- */
+
   useEffect(() => {
     setPage(1);
   }, [search, statusFilter]);
+
+  /* ---------------- STATUS STYLE ---------------- */
 
   const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
@@ -54,28 +59,29 @@ export default function MyApplications() {
     }
   };
 
-  // 🔍 Robust Search + Status Filter (CASE-SAFE)
+  /* ---------------- FILTER ---------------- */
+
   const filteredApplications = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-    const normalizedStatus = statusFilter.toLowerCase();
+    const q = search.trim().toLowerCase();
+    const status = statusFilter.toLowerCase();
 
     return applications.filter((app) => {
       const title = app.job?.title?.toLowerCase() || "";
       const company = app.job?.company?.toLowerCase() || "";
-      const status = app.status?.toLowerCase() || "";
+      const appStatus = app.status?.toLowerCase() || "";
 
       const matchesSearch =
-        title.includes(normalizedSearch) ||
-        company.includes(normalizedSearch);
+        !q || title.includes(q) || company.includes(q);
 
       const matchesStatus =
-        normalizedStatus === "all" || status === normalizedStatus;
+        status === "all" || appStatus === status;
 
       return matchesSearch && matchesStatus;
     });
   }, [applications, search, statusFilter]);
 
-  // 📄 Pagination
+  /* ---------------- PAGINATION ---------------- */
+
   const totalPages = Math.ceil(
     filteredApplications.length / ITEMS_PER_PAGE
   );
@@ -85,17 +91,26 @@ export default function MyApplications() {
     page * ITEMS_PER_PAGE
   );
 
+  /* ---------------- LOADING ---------------- */
+
   if (loading) {
     return (
-      <div className="p-10 text-center text-gray-500">
-        Loading your applications…
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="h-28 rounded-xl bg-gray-100 animate-pulse"
+          />
+        ))}
       </div>
     );
   }
 
+  /* ---------------- EMPTY ---------------- */
+
   if (!applications.length) {
     return (
-      <div className="p-10 text-center">
+      <div className="p-10 text-center animate-fade-up">
         <p className="text-lg font-medium mb-2">
           You haven’t applied to any jobs yet
         </p>
@@ -112,91 +127,88 @@ export default function MyApplications() {
     );
   }
 
+  /* ---------------- UI ---------------- */
+
   return (
-    <div className="max-w-6xl mx-auto px-6 py-5">
-      {/* Top Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        {/* Search */}
-        <div className="relative w-full sm:w-96">
-          <input
-            type="text"
-            placeholder="Search job title or company…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
-                       bg-white text-sm
-                       focus:outline-none focus:ring-2 focus:ring-blue-500
-                       transition"
-          />
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            🔍
-          </span>
-        </div>
-
-        {/* Status Filter Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setIsFilterOpen((v) => !v)}
-            className="flex items-center gap-2 px-4 py-2.5 border border-gray-300
-                       rounded-lg bg-white text-sm hover:bg-gray-50 transition"
-          >
-            <span>Status:</span>
-            <span className="font-medium">{statusFilter}</span>
-            <span
-              className={`transition-transform duration-200 ${
-                isFilterOpen ? "rotate-180" : ""
-              }`}
-            >
-              ▼
+    <div className="max-w-6xl mx-auto px-6 pt-5 space-y-5 animate-fade-up">
+      {/* STICKY CONTROLS */}
+      <div className="sticky top-0 z-10 bg-white pt-4 pb-3 border-b">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Search */}
+          <div className="relative w-full sm:w-96">
+            <input
+              type="text"
+              placeholder="Search job title or company…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300
+                         rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              🔍
             </span>
-          </button>
+          </div>
 
-          <div
-            className={`absolute right-0 mt-2 w-44 rounded-lg border border-gray-200
-                        bg-white shadow-lg overflow-hidden
-                        transform transition-all duration-200 origin-top
-              ${
-                isFilterOpen
-                  ? "scale-100 opacity-100"
-                  : "scale-95 opacity-0 pointer-events-none"
-              }`}
-          >
-            {STATUS_FILTERS.map((status) => (
-              <button
-                key={status}
-                onClick={() => {
-                  setStatusFilter(status);
-                  setIsFilterOpen(false);
-                }}
-                className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100
-                  ${
-                    statusFilter === status
-                      ? "bg-blue-50 text-blue-700 font-medium"
-                      : "text-gray-700"
-                  }`}
+          {/* Status Filter */}
+          <div className="relative">
+            <button
+              onClick={() => setIsFilterOpen((v) => !v)}
+              className="flex items-center gap-2 px-4 py-2.5 border
+                         rounded-lg bg-white text-sm hover:bg-gray-50"
+            >
+              Status:
+              <span className="font-medium">{statusFilter}</span>
+              <span
+                className={`transition-transform ${
+                  isFilterOpen ? "rotate-180" : ""
+                }`}
               >
-                {status}
-              </button>
-            ))}
+                ▼
+              </span>
+            </button>
+
+            {isFilterOpen && (
+              <div className="absolute right-0 mt-2 w-44 rounded-lg border
+                              bg-white shadow-lg overflow-hidden">
+                {STATUS_FILTERS.map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => {
+                      setStatusFilter(status);
+                      setIsFilterOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2 text-sm
+                      ${
+                        statusFilter === status
+                          ? "bg-blue-50 text-blue-700 font-medium"
+                          : "hover:bg-gray-100"
+                      }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Result Count */}
-      <p className="text-sm text-gray-500 mb-4">
+      {/* RESULT COUNT */}
+      <p className="text-sm text-gray-500">
         Showing {filteredApplications.length} result
         {filteredApplications.length !== 1 && "s"}
       </p>
 
-      {/* Application Cards */}
+      {/* APPLICATION CARDS */}
       <div className="space-y-4">
-        {paginatedApplications.map((app) => (
+        {paginatedApplications.map((app, index) => (
           <Link
             key={app._id}
             to={`/jobs/${app.job?._id}`}
+            style={{ animationDelay: `${index * 0.05}s` }}
             className="block bg-white border border-gray-200 rounded-xl p-5
                        hover:shadow-lg hover:-translate-y-[2px]
-                       transition-all duration-200"
+                       transition-all animate-fade-up"
           >
             <div className="flex justify-between items-center">
               <div>
@@ -212,7 +224,7 @@ export default function MyApplications() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-8">
+              <div className="flex items-center gap-6">
                 <div className="text-right">
                   <p className="text-xs text-gray-400">Match</p>
                   <p className="font-semibold text-lg">
@@ -233,9 +245,9 @@ export default function MyApplications() {
         ))}
       </div>
 
-      {/* Pagination */}
+      {/* PAGINATION */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-10">
+        <div className="flex justify-center items-center gap-2 pt-2">
           <button
             onClick={() => setPage((p) => Math.max(p - 1, 1))}
             disabled={page === 1}
@@ -252,7 +264,7 @@ export default function MyApplications() {
                 ${
                   page === i + 1
                     ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
+                    : "hover:bg-gray-100"
                 }`}
             >
               {i + 1}

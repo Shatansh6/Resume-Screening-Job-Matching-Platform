@@ -15,21 +15,24 @@ export default function AdminApplications() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  /* ---------------- FETCH ---------------- */
+
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         setLoading(true);
         const res = await api.get(`/applications/job/${jobId}`);
         setApplications(res.data.applications || []);
-      } catch (err) {
+      } catch {
         setError("Failed to load applications");
-        console.error(err);
       } finally {
         setLoading(false);
       }
     };
     fetchApplications();
   }, [jobId]);
+
+  /* ---------------- UPDATE STATUS ---------------- */
 
   const updateStatus = async (id, status) => {
     setUpdatingId(id);
@@ -43,9 +46,10 @@ export default function AdminApplications() {
     }
   };
 
-  /* 🔍 FILTER */
+  /* ---------------- FILTER ---------------- */
+
   const filteredApplications = useMemo(() => {
-    const q = search.toLowerCase();
+    const q = search.trim().toLowerCase();
 
     return applications.filter((a) => {
       const name = a.user?.name?.toLowerCase() || "";
@@ -54,7 +58,8 @@ export default function AdminApplications() {
     });
   }, [applications, search]);
 
-  /* 📄 PAGINATION */
+  /* ---------------- PAGINATION ---------------- */
+
   const totalPages = Math.ceil(
     filteredApplications.length / ITEMS_PER_PAGE
   );
@@ -67,10 +72,11 @@ export default function AdminApplications() {
     );
   }, [filteredApplications, currentPage]);
 
-  /* 🔄 Reset page on search */
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
+
+  /* ---------------- STATUS BADGE ---------------- */
 
   const statusBadge = (status) => {
     switch (status) {
@@ -85,12 +91,17 @@ export default function AdminApplications() {
     }
   };
 
-  /* ---------- STATES ---------- */
+  /* ---------------- LOADING ---------------- */
 
   if (loading) {
     return (
-      <div className="mt-20 text-center text-gray-400">
-        Loading applications…
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-4">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div
+            key={i}
+            className="h-16 rounded-xl bg-gray-100 animate-pulse"
+          />
+        ))}
       </div>
     );
   }
@@ -103,28 +114,30 @@ export default function AdminApplications() {
     );
   }
 
-  /* ---------- UI ---------- */
+  /* ---------------- UI ---------------- */
 
   return (
-    <div className="p-6">
+    <div className="max-w-6xl mx-auto px-6 py-6 space-y-5 animate-fade-up">
       {/* HEADER */}
-      <div className="mb-6">
+      <div>
         <h1 className="text-2xl font-bold text-gray-900">
           Applications
         </h1>
         <p className="text-sm text-gray-500">
-          Click a candidate to view full details
+          Review and manage candidates for this job
         </p>
       </div>
 
       {/* SEARCH */}
-      <div className="mb-4">
+      <div className="sticky top-0 z-10 bg-white pt-4 pb-3 border-b">
         <input
           type="text"
           placeholder="Search by name or email"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-80 rounded-lg border border-gray-300 px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          className="w-full md:w-80 rounded-lg border border-gray-300
+                     px-4 py-2 text-sm focus:ring-2
+                     focus:ring-indigo-500 focus:outline-none"
         />
       </div>
 
@@ -142,11 +155,13 @@ export default function AdminApplications() {
           </thead>
 
           <tbody>
-            {paginatedApplications.map((app) => (
+            {paginatedApplications.map((app, index) => (
               <tr
                 key={app._id}
+                style={{ animationDelay: `${index * 0.04}s` }}
                 onClick={() => setSelectedApp(app)}
-                className="cursor-pointer border-t hover:bg-gray-50"
+                className="cursor-pointer border-t hover:bg-gray-50
+                           transition animate-fade-up"
               >
                 <td className="px-6 py-4">
                   <p className="font-medium text-gray-900">
@@ -162,7 +177,9 @@ export default function AdminApplications() {
                 </td>
 
                 <td className="px-6 py-4">
-                  <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700">
+                  <span className="rounded-full bg-indigo-100
+                                   px-3 py-1 text-xs font-semibold
+                                   text-indigo-700">
                     {app.matchPercentage}%
                   </span>
                 </td>
@@ -187,7 +204,9 @@ export default function AdminApplications() {
                       updateStatus(app._id, e.target.value)
                     }
                     disabled={updatingId === app._id}
-                    className="rounded-md border border-gray-300 px-2 py-1 text-xs focus:ring-2 focus:ring-indigo-500"
+                    className="rounded-md border border-gray-300
+                               px-2 py-1 text-xs
+                               focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">Set</option>
                     <option value="reviewed">Reviewed</option>
@@ -209,13 +228,14 @@ export default function AdminApplications() {
 
       {/* PAGINATION */}
       {totalPages > 1 && (
-        <div className="mt-6 flex justify-center items-center gap-3">
+        <div className="pt-6 flex justify-center items-center gap-4">
           <button
             onClick={() =>
               setCurrentPage((p) => Math.max(p - 1, 1))
             }
             disabled={currentPage === 1}
-            className="rounded-lg border px-3 py-1 text-sm disabled:opacity-40"
+            className="rounded-lg border px-3 py-1
+                       text-sm disabled:opacity-40"
           >
             Prev
           </button>
@@ -231,18 +251,22 @@ export default function AdminApplications() {
               )
             }
             disabled={currentPage === totalPages}
-            className="rounded-lg border px-3 py-1 text-sm disabled:opacity-40"
+            className="rounded-lg border px-3 py-1
+                       text-sm disabled:opacity-40"
           >
             Next
           </button>
         </div>
       )}
 
-      {/* MODAL (unchanged logic, safe) */}
+      {/* MODAL */}
       {selectedApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-3xl rounded-xl bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="fixed inset-0 z-50 flex items-center
+                        justify-center bg-black/40">
+          <div className="w-full max-w-3xl rounded-xl
+                          bg-white shadow-xl animate-scale-in">
+            <div className="flex items-center justify-between
+                            border-b px-6 py-4">
               <h2 className="text-xl font-semibold">
                 Candidate Details
               </h2>
@@ -254,22 +278,17 @@ export default function AdminApplications() {
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <Info label="Name" value={selectedApp.user?.name} />
-                <Info
-                  label="Email"
-                  value={selectedApp.user?.email}
-                />
-                <Info
-                  label="Experience"
-                  value={`${selectedApp.user?.experience} years`}
-                />
-                <Info
-                  label="Match"
-                  value={`${selectedApp.matchPercentage}%`}
-                />
-              </div>
+            <div className="p-6 grid grid-cols-2 gap-6">
+              <Info label="Name" value={selectedApp.user?.name} />
+              <Info label="Email" value={selectedApp.user?.email} />
+              <Info
+                label="Experience"
+                value={`${selectedApp.user?.experience} years`}
+              />
+              <Info
+                label="Match"
+                value={`${selectedApp.matchPercentage}%`}
+              />
             </div>
 
             <div className="flex justify-end border-t px-6 py-4">
@@ -287,7 +306,7 @@ export default function AdminApplications() {
   );
 }
 
-/* 🔹 Small helper */
+/* 🔹 Helper */
 function Info({ label, value }) {
   return (
     <div>
