@@ -45,7 +45,7 @@ export default function RecommendedJobs() {
 
   if (loading) {
     return (
-      <div className="p-8 sm:p-10 text-center text-[rgb(var(--text-muted))]">
+      <div className="p-10 text-center text-gray-500">
         Finding best matches…
       </div>
     );
@@ -53,9 +53,9 @@ export default function RecommendedJobs() {
 
   if (!jobs.length) {
     return (
-      <div className="p-8 sm:p-10 text-center">
+      <div className="p-10 text-center">
         <p className="text-lg font-medium">No jobs found</p>
-        <p className="text-sm text-[rgb(var(--text-muted))]">
+        <p className="text-sm text-gray-500">
           Improve your resume or skills
         </p>
       </div>
@@ -63,15 +63,15 @@ export default function RecommendedJobs() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
         <h2 className="text-xl sm:text-2xl font-semibold">
           Recommended Jobs
         </h2>
         <Link
           to="/user/applications"
-          className="text-sm text-[rgb(var(--primary))] hover:underline"
+          className="text-sm text-blue-600 hover:underline"
         >
           View Applications →
         </Link>
@@ -83,13 +83,11 @@ export default function RecommendedJobs() {
         return (
           <div
             key={job._id}
-            className="bg-white
-                       border border-[rgb(var(--border))]
-                       rounded-2xl p-4 sm:p-6
-                       animate-fade-up"
+            className="bg-white border border-gray-200
+                       rounded-2xl p-4 sm:p-6 animate-fade-up"
             style={{ animationDelay: `${idx * 0.05}s` }}
           >
-            <div className="grid grid-cols-12 gap-4 sm:gap-6">
+            <div className="grid grid-cols-12 gap-6">
               {/* LEFT */}
               <div className="col-span-12 md:col-span-8 space-y-4">
                 <div>
@@ -97,33 +95,26 @@ export default function RecommendedJobs() {
                     {job.title}
                   </h3>
 
-                  <p className="text-sm text-[rgb(var(--text-muted))]">
+                  <p className="text-sm text-gray-500">
                     {job.company}
                   </p>
 
-                  <p className="text-xs text-[rgb(var(--text-muted))] mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     📍 {job.location || "Remote"} · 💼{" "}
-                    {job.experience || "0–2"} yrs · 🕒 Full-time
+                    {job.experience || "0–2"} yrs
                   </p>
                 </div>
 
-                {job.salary && (
-                  <p className="text-sm font-medium">
-                    💰 {job.salary}
-                  </p>
-                )}
-
-                <p className="text-sm text-[rgb(var(--text-muted))] line-clamp-3">
+                <p className="text-sm text-gray-600 line-clamp-3">
                   {job.description || "No description available"}
                 </p>
 
-                <div className="flex flex-wrap gap-3 pt-2">
+                {/* DESKTOP ACTIONS */}
+                <div className="hidden md:flex flex-wrap gap-3 pt-2">
                   {item.applicationStatus ? (
                     <span
                       className="px-4 py-2 rounded-full
-                                 bg-[rgb(var(--primary-soft))]
-                                 text-[rgb(var(--primary))]
-                                 text-sm"
+                                 bg-green-100 text-green-700 text-sm"
                     >
                       {item.applicationStatus}
                     </span>
@@ -133,20 +124,17 @@ export default function RecommendedJobs() {
                         onClick={() => handleApply(job._id)}
                         disabled={applyingId === job._id}
                         className="px-5 py-2 rounded-full
-                                   bg-[rgb(var(--primary))]
-                                   text-white text-sm
-                                   hover:bg-blue-700
-                                   disabled:opacity-50
-                                   transition"
+                                   bg-blue-600 text-white text-sm
+                                   disabled:opacity-50"
                       >
-                        {applyingId === job._id ? "Applying…" : "Apply"}
+                        {applyingId === job._id
+                          ? "Applying…"
+                          : "Apply"}
                       </button>
 
                       <button
                         className="px-5 py-2 rounded-full
-                                   border border-[rgb(var(--border))]
-                                   hover:bg-[rgb(var(--bg-soft))]
-                                   text-sm transition"
+                                   border border-gray-300 text-sm"
                       >
                         Save
                       </button>
@@ -158,10 +146,9 @@ export default function RecommendedJobs() {
               {/* RIGHT – MATCH PANEL */}
               <div
                 className="col-span-12 md:col-span-4
-                           md:border-l border-[rgb(var(--border))]
-                           md:pl-6"
+                           md:border-l border-gray-200 md:pl-6"
               >
-                <div className="flex md:block items-center md:items-start gap-4 md:gap-0 md:space-y-4">
+                <div className="flex md:block gap-4 md:gap-0 md:space-y-4">
                   <AnimatedCircularProgress
                     percentage={item.matchPercentage}
                   />
@@ -174,7 +161,8 @@ export default function RecommendedJobs() {
                         ? "Moderate Match"
                         : "Low Match"}
                     </p>
-                    <p className="text-xs text-[rgb(var(--text-muted))]">
+
+                    <p className="text-xs text-gray-500">
                       Based on your resume
                     </p>
 
@@ -184,24 +172,51 @@ export default function RecommendedJobs() {
                       </p>
 
                       {item.matchedSkills?.map((s) => (
-                        <p
-                          key={s}
-                          className="text-[rgb(var(--accent))]"
-                        >
+                        <p key={s} className="text-green-600">
                           ✓ {s}
                         </p>
                       ))}
 
                       {item.missingSkills?.map((s) => (
-                        <p
-                          key={s}
-                          className="text-[rgb(var(--text-muted))]"
-                        >
+                        <p key={s} className="text-gray-400">
                           ✗ {s}
                         </p>
                       ))}
                     </div>
                   </div>
+                </div>
+
+                {/* MOBILE ACTIONS */}
+                <div className="mt-4 flex gap-3 md:hidden">
+                  {item.applicationStatus ? (
+                    <span
+                      className="px-4 py-2 rounded-full
+                                 bg-green-100 text-green-700 text-sm"
+                    >
+                      {item.applicationStatus}
+                    </span>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleApply(job._id)}
+                        disabled={applyingId === job._id}
+                        className="flex-1 px-4 py-2 rounded-full
+                                   bg-blue-600 text-white text-sm
+                                   disabled:opacity-50"
+                      >
+                        {applyingId === job._id
+                          ? "Applying…"
+                          : "Apply"}
+                      </button>
+
+                      <button
+                        className="flex-1 px-4 py-2 rounded-full
+                                   border border-gray-300 text-sm"
+                      >
+                        Save
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
