@@ -81,7 +81,7 @@ export default function CreateJob() {
       {/* FORM */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-2xl border border-gray-200 bg-white p-8 shadow-md space-y-6"
+        className="rounded-2xl border border-gray-200 bg-white px-8 py-4 shadow-md space-y-6"
       >
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">

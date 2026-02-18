@@ -4,6 +4,7 @@ import { getPublicJobs } from "../services/job.service";
 import { applyToJob } from "../services/application.service";
 import { useAuth } from "../auth/AuthContext";
 import Toast from "../components/ui/Toast";
+import AuthModal from "../auth/AuthModel";
 
 const JOBS_PER_PAGE = 4;
 
@@ -20,6 +21,7 @@ export default function AllJobs() {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAuth, setShowAuth] = useState(false);
 
   /* ---------------- FETCH ---------------- */
 
@@ -80,7 +82,7 @@ export default function AllJobs() {
 
   const handleApply = async (jobId) => {
     if (!user) {
-      navigate("/login");
+      setShowAuth(true);
       return;
     }
 
@@ -104,15 +106,17 @@ export default function AllJobs() {
     }
   };
 
-  /* ---------------- LOADING (SKELETON) ---------------- */
+  /* ---------------- LOADING ---------------- */
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="h-60 rounded-2xl bg-gray-100 animate-pulse"
+            className="h-52 sm:h-60 rounded-2xl
+                       bg-[rgb(var(--bg-soft))]
+                       animate-pulse"
           />
         ))}
       </div>
@@ -122,157 +126,192 @@ export default function AllJobs() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="max-w-7xl mx-auto px-6 space-y-6 animate-fade-up">
-      {/* SEARCH */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row gap-4">
-        <input
-          type="text"
-          placeholder="Search by title, company, skill"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm
-                     focus:outline-none focus:ring-2 focus:ring-black"
-        />
+    <>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6 animate-fade-up">
 
-        <input
-          type="text"
-          placeholder="Location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          className="w-full sm:w-60 px-4 py-2 border border-gray-300 rounded-lg text-sm
-                     focus:outline-none focus:ring-2 focus:ring-black"
+        {/* SEARCH */}
+        <div
+          className="bg-white border
+                     border-[rgb(var(--border))]
+                     rounded-xl p-4
+                     flex flex-col sm:flex-row gap-3 sm:gap-4"
+        >
+          <input
+            type="text"
+            placeholder="Search by title, company, skill"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 px-4 py-2
+                       border border-[rgb(var(--border))]
+                       rounded-lg text-sm
+                       focus:outline-none
+                       focus:ring-2
+                       focus:ring-[rgb(var(--primary-soft))]"
+          />
+
+          <input
+            type="text"
+            placeholder="Location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="w-full sm:w-60 px-4 py-2
+                       border border-[rgb(var(--border))]
+                       rounded-lg text-sm
+                       focus:outline-none
+                       focus:ring-2
+                       focus:ring-[rgb(var(--primary-soft))]"
+          />
+        </div>
+
+        {/* EMPTY STATE */}
+        {filteredJobs.length === 0 && (
+          <div className="py-14 text-center">
+            <h2 className="text-lg sm:text-xl font-semibold">
+              No jobs found
+            </h2>
+            <p className="text-sm text-[rgb(var(--text-muted))] mt-2">
+              Try adjusting your search or location filters.
+            </p>
+          </div>
+        )}
+
+        {/* JOB CARDS */}
+        {filteredJobs.length > 0 && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {currentJobs.map((job, index) => (
+                <div
+                  key={job._id}
+                  style={{ animationDelay: `${index * 0.08}s` }}
+                  className="bg-white
+                             border border-[rgb(var(--border))]
+                             rounded-2xl p-4 sm:p-6
+                             flex flex-col
+                             hover:shadow-lg
+                             hover:-translate-y-0.5
+                             transition-all"
+                >
+                  <div className="flex-1">
+                    <h3 className="text-base sm:text-lg font-semibold">
+                      {job.title}
+                    </h3>
+
+                    <p className="text-sm text-[rgb(var(--text-muted))] mt-1">
+                      {job.company} • {job.location || "Remote"}
+                    </p>
+
+                    <p className="text-sm text-[rgb(var(--text-muted))] mt-3 line-clamp-2">
+                      {job.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {job.skillsRequired?.slice(0, 5).map((skill) => (
+                        <span
+                          key={skill}
+                          className="px-3 py-1 text-xs rounded-full
+                                     bg-[rgb(var(--bg-soft))]
+                                     text-[rgb(var(--text-dark))]"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+
+                    <p className="text-sm text-[rgb(var(--text-muted))] mt-4">
+                      Experience:{" "}
+                      <span className="font-medium">
+                        {job.experience}+ years
+                      </span>
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => handleApply(job._id)}
+                    disabled={
+                      applyingId === job._id ||
+                      appliedJobs.has(job._id)
+                    }
+                    className="mt-5 w-full py-2.5
+                               rounded-lg text-sm font-medium
+                               bg-[rgb(var(--primary))]
+                               text-white
+                               hover:bg-blue-700
+                               disabled:opacity-50
+                               transition"
+                  >
+                    {!user
+                      ? "Login to Apply"
+                      : !user.hasResume
+                      ? "Upload Resume to Apply"
+                      : appliedJobs.has(job._id)
+                      ? "Applied"
+                      : applyingId === job._id
+                      ? "Applying…"
+                      : "Apply"}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* PAGINATION */}
+            {totalPages > 1 && (
+              <div className="flex flex-wrap justify-center gap-2 pt-4">
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.max(p - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="px-3 py-1
+                             border border-[rgb(var(--border))]
+                             rounded disabled:opacity-40"
+                >
+                  Prev
+                </button>
+
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`px-3 py-1 rounded border
+                      ${
+                        currentPage === i + 1
+                          ? "bg-[rgb(var(--primary))] text-white"
+                          : "border-[rgb(var(--border))] hover:bg-[rgb(var(--bg-soft))]"
+                      }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) =>
+                      Math.min(p + 1, totalPages)
+                    )
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1
+                             border border-[rgb(var(--border))]
+                             rounded disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ message: "", type: "" })}
         />
       </div>
 
-      {/* EMPTY STATE */}
-      {filteredJobs.length === 0 && (
-        <div className="py-16 text-center animate-fade-up">
-          <h2 className="text-xl font-semibold">No jobs found</h2>
-          <p className="text-sm text-gray-500 mt-2">
-            Try adjusting your search or location filters.
-          </p>
-        </div>
+      {/* AUTH MODAL */}
+      {showAuth && (
+        <AuthModal onClose={() => setShowAuth(false)} />
       )}
-
-      {/* JOB CARDS */}
-      {filteredJobs.length > 0 && (
-        <>
-          <div
-            key={currentPage}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            {currentJobs.map((job, index) => (
-              <div
-                key={job._id}
-                style={{ animationDelay: `${index * 0.08}s` }}
-                className="bg-white border border-gray-200 rounded-2xl p-6
-                           flex flex-col hover:shadow-lg hover:-translate-y-0.5
-                           transition-all animate-fade-up"
-              >
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold">
-                    {job.title}
-                  </h3>
-
-                  <p className="text-sm text-gray-500 mt-1">
-                    {job.company} • {job.location || "Remote"}
-                  </p>
-
-                  <p className="text-sm text-gray-600 mt-3 line-clamp-2">
-                    {job.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {job.skillsRequired?.slice(0, 5).map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-3 py-1 text-xs rounded-full
-                                   bg-gray-100 text-gray-700"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-
-                  <p className="text-sm text-gray-500 mt-4">
-                    Experience:{" "}
-                    <span className="font-medium">
-                      {job.experience}+ years
-                    </span>
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => handleApply(job._id)}
-                  disabled={
-                    applyingId === job._id ||
-                    appliedJobs.has(job._id)
-                  }
-                  className="mt-6 w-full py-2 rounded-lg text-sm font-medium
-                             bg-black text-white disabled:opacity-50"
-                >
-                  {!user
-                    ? "Login to Apply"
-                    : !user.hasResume
-                    ? "Upload Resume to Apply"
-                    : appliedJobs.has(job._id)
-                    ? "Applied"
-                    : applyingId === job._id
-                    ? "Applying…"
-                    : "Apply"}
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* PAGINATION */}
-          {totalPages > 1 && (
-            <div className="flex justify-center gap-2 pt-4">
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.max(p - 1, 1))
-                }
-                disabled={currentPage === 1}
-                className="px-3 py-1 border rounded disabled:opacity-40"
-              >
-                Prev
-              </button>
-
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`px-3 py-1 border rounded ${
-                    currentPage === i + 1
-                      ? "bg-black text-white"
-                      : "bg-white"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-
-              <button
-                onClick={() =>
-                  setCurrentPage((p) =>
-                    Math.min(p + 1, totalPages)
-                  )
-                }
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 border rounded disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ message: "", type: "" })}
-      />
-    </div>
+    </>
   );
 }

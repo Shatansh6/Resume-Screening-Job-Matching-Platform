@@ -45,7 +45,7 @@ export default function RecommendedJobs() {
 
   if (loading) {
     return (
-      <div className="p-10 text-center text-gray-500">
+      <div className="p-8 sm:p-10 text-center text-[rgb(var(--text-muted))]">
         Finding best matches…
       </div>
     );
@@ -53,9 +53,9 @@ export default function RecommendedJobs() {
 
   if (!jobs.length) {
     return (
-      <div className="p-10 text-center">
+      <div className="p-8 sm:p-10 text-center">
         <p className="text-lg font-medium">No jobs found</p>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-[rgb(var(--text-muted))]">
           Improve your resume or skills
         </p>
       </div>
@@ -63,50 +63,68 @@ export default function RecommendedJobs() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10 space-y-6">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Recommended Jobs</h2>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+        <h2 className="text-xl sm:text-2xl font-semibold">
+          Recommended Jobs
+        </h2>
         <Link
           to="/user/applications"
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm text-[rgb(var(--primary))] hover:underline"
         >
           View Applications →
         </Link>
       </div>
 
-      {jobs.map((item) => {
+      {jobs.map((item, idx) => {
         const job = item.job || item;
 
         return (
           <div
             key={job._id}
-            className="bg-white border border-gray-200 rounded-2xl p-6"
+            className="bg-white
+                       border border-[rgb(var(--border))]
+                       rounded-2xl p-4 sm:p-6
+                       animate-fade-up"
+            style={{ animationDelay: `${idx * 0.05}s` }}
           >
-            <div className="grid grid-cols-12 gap-6">
-
-              {/* LEFT 70% */}
+            <div className="grid grid-cols-12 gap-4 sm:gap-6">
+              {/* LEFT */}
               <div className="col-span-12 md:col-span-8 space-y-4">
                 <div>
-                  <h3 className="text-xl font-semibold">{job.title}</h3>
-                  <p className="text-sm text-gray-500">{job.company}</p>
+                  <h3 className="text-lg sm:text-xl font-semibold">
+                    {job.title}
+                  </h3>
 
-                  <p className="text-xs text-gray-400 mt-1">
-                    📍 {job.location || "Remote"} · 💼 {job.experience || "0–2"} yrs · 🕒 Full-time
+                  <p className="text-sm text-[rgb(var(--text-muted))]">
+                    {job.company}
+                  </p>
+
+                  <p className="text-xs text-[rgb(var(--text-muted))] mt-1">
+                    📍 {job.location || "Remote"} · 💼{" "}
+                    {job.experience || "0–2"} yrs · 🕒 Full-time
                   </p>
                 </div>
 
                 {job.salary && (
-                  <p className="text-sm font-medium">💰 {job.salary}</p>
+                  <p className="text-sm font-medium">
+                    💰 {job.salary}
+                  </p>
                 )}
 
-                <p className="text-sm text-gray-600 line-clamp-3">
+                <p className="text-sm text-[rgb(var(--text-muted))] line-clamp-3">
                   {job.description || "No description available"}
                 </p>
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex flex-wrap gap-3 pt-2">
                   {item.applicationStatus ? (
-                    <span className="px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm">
+                    <span
+                      className="px-4 py-2 rounded-full
+                                 bg-[rgb(var(--primary-soft))]
+                                 text-[rgb(var(--primary))]
+                                 text-sm"
+                    >
                       {item.applicationStatus}
                     </span>
                   ) : (
@@ -114,12 +132,22 @@ export default function RecommendedJobs() {
                       <button
                         onClick={() => handleApply(job._id)}
                         disabled={applyingId === job._id}
-                        className="px-5 py-2 rounded-full bg-black text-white text-sm disabled:opacity-50"
+                        className="px-5 py-2 rounded-full
+                                   bg-[rgb(var(--primary))]
+                                   text-white text-sm
+                                   hover:bg-blue-700
+                                   disabled:opacity-50
+                                   transition"
                       >
                         {applyingId === job._id ? "Applying…" : "Apply"}
                       </button>
 
-                      <button className="px-5 py-2 rounded-full border text-sm">
+                      <button
+                        className="px-5 py-2 rounded-full
+                                   border border-[rgb(var(--border))]
+                                   hover:bg-[rgb(var(--bg-soft))]
+                                   text-sm transition"
+                      >
                         Save
                       </button>
                     </>
@@ -127,48 +155,55 @@ export default function RecommendedJobs() {
                 </div>
               </div>
 
-              {/* RIGHT 30% – STICKY MATCH PANEL */}
-              <div className="col-span-12 md:col-span-4 border-l pl-6">
-                <div className="sticky top-6 space-y-4">
+              {/* RIGHT – MATCH PANEL */}
+              <div
+                className="col-span-12 md:col-span-4
+                           md:border-l border-[rgb(var(--border))]
+                           md:pl-6"
+              >
+                <div className="flex md:block items-center md:items-start gap-4 md:gap-0 md:space-y-4">
+                  <AnimatedCircularProgress
+                    percentage={item.matchPercentage}
+                  />
 
-                  <div className="flex items-center gap-4">
-                    <AnimatedCircularProgress
-                      percentage={item.matchPercentage}
-                    />
+                  <div>
+                    <p className="text-sm font-semibold">
+                      {item.matchPercentage >= 80
+                        ? "Strong Match"
+                        : item.matchPercentage >= 60
+                        ? "Moderate Match"
+                        : "Low Match"}
+                    </p>
+                    <p className="text-xs text-[rgb(var(--text-muted))]">
+                      Based on your resume
+                    </p>
 
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {item.matchPercentage >= 80
-                          ? "Strong Match"
-                          : item.matchPercentage >= 60
-                          ? "Moderate Match"
-                          : "Low Match"}
+                    <div className="text-xs mt-3 space-y-1">
+                      <p className="font-medium mb-1">
+                        Why this job?
                       </p>
-                      <p className="text-xs text-gray-500">
-                        Based on your resume
-                      </p>
+
+                      {item.matchedSkills?.map((s) => (
+                        <p
+                          key={s}
+                          className="text-[rgb(var(--accent))]"
+                        >
+                          ✓ {s}
+                        </p>
+                      ))}
+
+                      {item.missingSkills?.map((s) => (
+                        <p
+                          key={s}
+                          className="text-[rgb(var(--text-muted))]"
+                        >
+                          ✗ {s}
+                        </p>
+                      ))}
                     </div>
                   </div>
-
-                  <div className="text-xs">
-                    <p className="font-medium mb-2">Why this job?</p>
-
-                    {item.matchedSkills?.map((s) => (
-                      <p key={s} className="text-green-700">
-                        ✓ {s}
-                      </p>
-                    ))}
-
-                    {item.missingSkills?.map((s) => (
-                      <p key={s} className="text-gray-400">
-                        ✗ {s}
-                      </p>
-                    ))}
-                  </div>
-
                 </div>
               </div>
-
             </div>
           </div>
         );

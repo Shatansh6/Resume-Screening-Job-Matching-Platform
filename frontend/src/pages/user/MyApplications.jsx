@@ -27,8 +27,6 @@ export default function MyApplications() {
       try {
         const res = await api.get("/applications/my-applications");
         setApplications(res.data?.data || []);
-      } catch {
-        // silent fail handled by empty state
       } finally {
         setLoading(false);
       }
@@ -47,15 +45,15 @@ export default function MyApplications() {
   const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
       case "applied":
-        return "bg-blue-100 text-blue-700";
+        return "bg-[rgb(var(--primary-soft))] text-[rgb(var(--primary))]";
       case "reviewed":
         return "bg-yellow-100 text-yellow-700";
       case "selected":
-        return "bg-green-100 text-green-700";
+        return "bg-[rgba(34,197,94,0.12)] text-[rgb(var(--success))]";
       case "rejected":
-        return "bg-red-100 text-red-700";
+        return "bg-[rgba(239,68,68,0.12)] text-[rgb(var(--error))]";
       default:
-        return "bg-gray-100 text-gray-600";
+        return "bg-[rgb(var(--bg-soft))] text-[rgb(var(--text-muted))]";
     }
   };
 
@@ -95,11 +93,13 @@ export default function MyApplications() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-4">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-4">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="h-28 rounded-xl bg-gray-100 animate-pulse"
+            className="h-28 rounded-xl
+                       bg-[rgb(var(--bg-soft))]
+                       animate-pulse"
           />
         ))}
       </div>
@@ -110,16 +110,17 @@ export default function MyApplications() {
 
   if (!applications.length) {
     return (
-      <div className="p-10 text-center animate-fade-up">
+      <div className="p-8 sm:p-10 text-center animate-fade-up">
         <p className="text-lg font-medium mb-2">
           You haven’t applied to any jobs yet
         </p>
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-[rgb(var(--text-muted))]">
           Apply to jobs and track your progress here.
         </p>
         <Link
           to="/user/recommended"
-          className="inline-block mt-4 text-sm text-blue-600 hover:underline"
+          className="inline-block mt-4 text-sm
+                     text-[rgb(var(--primary))] hover:underline"
         >
           View Recommended Jobs →
         </Link>
@@ -130,10 +131,14 @@ export default function MyApplications() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="max-w-6xl mx-auto px-6 pt-5 space-y-5 animate-fade-up">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 space-y-5 animate-fade-up">
       {/* STICKY CONTROLS */}
-      <div className="sticky top-0 z-10 bg-white pt-4 pb-3 border-b">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div
+        className="sticky top-0 z-10 bg-white
+                   pt-4 pb-3 border-b
+                   border-[rgb(var(--border))]"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           {/* Search */}
           <div className="relative w-full sm:w-96">
             <input
@@ -141,23 +146,32 @@ export default function MyApplications() {
               placeholder="Search job title or company…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300
-                         rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2.5
+                         border border-[rgb(var(--border))]
+                         rounded-lg text-sm
+                         focus:outline-none
+                         focus:ring-2
+                         focus:ring-[rgb(var(--primary-soft))]"
             />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgb(var(--text-muted))]">
               🔍
             </span>
           </div>
 
           {/* Status Filter */}
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <button
               onClick={() => setIsFilterOpen((v) => !v)}
-              className="flex items-center gap-2 px-4 py-2.5 border
-                         rounded-lg bg-white text-sm hover:bg-gray-50"
+              className="w-full sm:w-auto
+                         flex items-center justify-between sm:justify-start
+                         gap-2 px-4 py-2.5 border
+                         border-[rgb(var(--border))]
+                         rounded-lg bg-white text-sm
+                         hover:bg-[rgb(var(--bg-soft))]"
             >
-              Status:
-              <span className="font-medium">{statusFilter}</span>
+              <span>
+                Status: <span className="font-medium">{statusFilter}</span>
+              </span>
               <span
                 className={`transition-transform ${
                   isFilterOpen ? "rotate-180" : ""
@@ -168,8 +182,12 @@ export default function MyApplications() {
             </button>
 
             {isFilterOpen && (
-              <div className="absolute right-0 mt-2 w-44 rounded-lg border
-                              bg-white shadow-lg overflow-hidden">
+              <div
+                className="absolute right-0 mt-2 w-full sm:w-44
+                           rounded-lg border
+                           border-[rgb(var(--border))]
+                           bg-white shadow-lg overflow-hidden"
+              >
                 {STATUS_FILTERS.map((status) => (
                   <button
                     key={status}
@@ -180,8 +198,8 @@ export default function MyApplications() {
                     className={`w-full text-left px-4 py-2 text-sm
                       ${
                         statusFilter === status
-                          ? "bg-blue-50 text-blue-700 font-medium"
-                          : "hover:bg-gray-100"
+                          ? "bg-[rgb(var(--primary-soft))] text-[rgb(var(--primary))] font-medium"
+                          : "hover:bg-[rgb(var(--bg-soft))]"
                       }`}
                   >
                     {status}
@@ -194,7 +212,7 @@ export default function MyApplications() {
       </div>
 
       {/* RESULT COUNT */}
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-[rgb(var(--text-muted))]">
         Showing {filteredApplications.length} result
         {filteredApplications.length !== 1 && "s"}
       </p>
@@ -206,36 +224,44 @@ export default function MyApplications() {
             key={app._id}
             to={`/jobs/${app.job?._id}`}
             style={{ animationDelay: `${index * 0.05}s` }}
-            className="block bg-white border border-gray-200 rounded-xl p-5
-                       hover:shadow-lg hover:-translate-y-[2px]
+            className="block bg-white
+                       border border-[rgb(var(--border))]
+                       rounded-xl p-4 sm:p-5
+                       hover:shadow-lg
+                       hover:-translate-y-[2px]
                        transition-all animate-fade-up"
           >
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
               <div>
-                <h3 className="font-semibold text-lg">
+                <h3 className="font-semibold text-base sm:text-lg">
                   {app.job?.title || "Untitled Job"}
                 </h3>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-[rgb(var(--text-muted))]">
                   {app.job?.company || "Unknown Company"}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-[rgb(var(--text-muted))] mt-1">
                   Applied on{" "}
                   {new Date(app.createdAt).toLocaleDateString()}
                 </p>
               </div>
 
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="text-xs text-gray-400">Match</p>
-                  <p className="font-semibold text-lg">
+              <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
+                <div className="text-left sm:text-right">
+                  <p className="text-xs text-[rgb(var(--text-muted))]">
+                    Match
+                  </p>
+                  <p
+                    className="font-semibold text-lg
+                               text-[rgb(var(--accent))]"
+                  >
                     {app.matchPercentage ?? 0}%
                   </p>
                 </div>
 
                 <span
-                  className={`px-4 py-1.5 rounded-full text-xs font-medium ${getStatusStyle(
-                    app.status
-                  )}`}
+                  className={`px-4 py-1.5 rounded-full
+                              text-xs font-medium
+                              ${getStatusStyle(app.status)}`}
                 >
                   {app.status}
                 </span>
@@ -247,11 +273,13 @@ export default function MyApplications() {
 
       {/* PAGINATION */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 pt-2">
+        <div className="flex flex-wrap justify-center items-center gap-2 pt-2">
           <button
             onClick={() => setPage((p) => Math.max(p - 1, 1))}
             disabled={page === 1}
-            className="px-3 py-1 text-sm border rounded disabled:opacity-40"
+            className="px-3 py-1 text-sm
+                       border border-[rgb(var(--border))]
+                       rounded disabled:opacity-40"
           >
             Prev
           </button>
@@ -263,8 +291,8 @@ export default function MyApplications() {
               className={`px-3 py-1 text-sm rounded border
                 ${
                   page === i + 1
-                    ? "bg-blue-600 text-white"
-                    : "hover:bg-gray-100"
+                    ? "bg-[rgb(var(--primary))] text-white"
+                    : "border-[rgb(var(--border))] hover:bg-[rgb(var(--bg-soft))]"
                 }`}
             >
               {i + 1}
@@ -276,7 +304,9 @@ export default function MyApplications() {
               setPage((p) => Math.min(p + 1, totalPages))
             }
             disabled={page === totalPages}
-            className="px-3 py-1 text-sm border rounded disabled:opacity-40"
+            className="px-3 py-1 text-sm
+                       border border-[rgb(var(--border))]
+                       rounded disabled:opacity-40"
           >
             Next
           </button>

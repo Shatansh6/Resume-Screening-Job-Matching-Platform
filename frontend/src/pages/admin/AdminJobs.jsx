@@ -78,7 +78,7 @@ export default function AdminJobs() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-6 space-y-6 animate-fade-up">
+    <div className="max-w-6xl mx-auto px-6 space-y-6 animate-fade-up">
       {/* HEADER */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
