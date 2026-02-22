@@ -27,7 +27,7 @@ export default function Navbar() {
             to="/"
             className="text-xl font-bold text-[rgb(var(--primary))]"
           >
-            ResumeMatch
+            <img src="/src/images/logo.png" alt="ResumeMatch Logo" className="h-18 w-1 8" />
           </Link>
 
           {/* DESKTOP NAV */}

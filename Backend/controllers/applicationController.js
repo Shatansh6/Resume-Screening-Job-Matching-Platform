@@ -1,11 +1,14 @@
 import Application from "../models/Application.js";
 import Job from "../models/Job.js";
+import User from "../models/User.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import User from "../models/User.js";
 import { calculateMatch } from "../utils/matchingLogic.js";
+import { screenResume } from "../services/screeningEngine.js";
 
-// APPLY FOR JOB
+/* =========================================================
+   APPLY FOR JOB (MATCHING + SCREENING)
+   ========================================================= */
 export const applyForJob = asyncHandler(async (req, res) => {
   const { jobId } = req.body;
 
@@ -18,7 +21,6 @@ export const applyForJob = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Job not found");
   }
 
-  // ✅ Correct duplicate check
   const alreadyApplied = await Application.findOne({
     user: req.user._id,
     job: jobId,
@@ -33,21 +35,35 @@ export const applyForJob = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
 
-  // ✅ Correct match calculation
-  const {
-    matchPercentage,
-    matchedSkills,
-    missingSkills,
-  } = calculateMatch(user.skills, job.skillsRequired);
+  /* ---------------- MATCHING ---------------- */
+  const matchResult = calculateMatch(
+    user.skills,
+    job.skillsRequired
+  );
 
-  // ✅ Correct application creation
+  /* ---------------- SCREENING ---------------- */
+  const screening = screenResume({
+    resume: {
+      skills: user.skills,
+      experience: user.experience || 0,
+    },
+    job,
+    matchResult,
+  });
+
+  /* ---------------- CREATE APPLICATION ---------------- */
   const application = await Application.create({
-    job: jobId,
     user: req.user._id,
+    job: jobId,
+
     status: "Applied",
-    matchPercentage,
-    matchedSkills,
-    missingSkills,
+
+    matchPercentage: matchResult.matchPercentage,
+    matchedSkills: matchResult.matchedSkills,
+    missingSkills: matchResult.missingSkills,
+
+    screeningStatus: screening.status,
+    screeningReasons: screening.reasons,
   });
 
   const populatedApplication = await Application.findById(application._id)
@@ -56,13 +72,17 @@ export const applyForJob = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: "Job applied successfully",
+    message:
+      screening.status === "REJECTED"
+        ? "Application submitted but did not pass screening"
+        : "Application submitted successfully",
     application: populatedApplication,
   });
 });
 
-
-// USER APPLICATIONS
+/* =========================================================
+   USER APPLICATIONS
+   ========================================================= */
 export const getMyApplications = asyncHandler(async (req, res) => {
   const applications = await Application.find({
     user: req.user._id,
@@ -74,13 +94,13 @@ export const getMyApplications = asyncHandler(async (req, res) => {
   });
 });
 
-// ADMIN APPLICATIONS
+/* =========================================================
+   ADMIN: ALL APPLICATIONS (SORTED BY MATCH)
+   ========================================================= */
 export const getAllApplications = asyncHandler(async (req, res) => {
   const applications = await Application.find()
     .populate("user", "name email")
     .populate("job", "title company")
-
-    // ⭐ AI Sorting
     .sort({ matchPercentage: -1 });
 
   res.status(200).json({
@@ -90,10 +110,14 @@ export const getAllApplications = asyncHandler(async (req, res) => {
   });
 });
 
+/* =========================================================
+   ADMIN: UPDATE APPLICATION STATUS (MANUAL REVIEW)
+   ========================================================= */
 export const updateApplicationStatus = asyncHandler(async (req, res) => {
   const { applicationId } = req.params;
   const { status } = req.body;
-if (!["reviewed", "rejected", "selected"].includes(status)) {
+
+  if (!["Reviewed", "Rejected", "Selected"].includes(status)) {
     throw new ApiError(400, "Invalid status");
   }
 
@@ -101,23 +125,26 @@ if (!["reviewed", "rejected", "selected"].includes(status)) {
   if (!application) {
     throw new ApiError(404, "Application not found");
   }
+
   application.status = status;
   await application.save();
 
   res.status(200).json({
     success: true,
-    message: `Application ${status} successfull`,
+    message: `Application ${status} successfully`,
     application,
   });
 });
 
+/* =========================================================
+   ADMIN: APPLICATIONS BY JOB (WITH SCREENING DATA)
+   ========================================================= */
 export const getApplicationsByJob = asyncHandler(async (req, res) => {
   const { jobId } = req.params;
 
   const applications = await Application.find({ job: jobId })
-.populate("user", "name email skills experience")    .populate("job", "title company")
-
-    // ⭐ AI sorting
+    .populate("user", "name email skills experience")
+    .populate("job", "title company")
     .sort({ matchPercentage: -1 });
 
   res.status(200).json({
@@ -126,31 +153,17 @@ export const getApplicationsByJob = asyncHandler(async (req, res) => {
     applications,
   });
 });
+
+/* =========================================================
+   USER: JOBS POSTED BY ME
+   ========================================================= */
 export const getMyPostedJobs = asyncHandler(async (req, res) => {
-  const jobs = await Job.find({ createdBy: req.user._id }).sort({
-    createdAt: -1,
-  });
+  const jobs = await Job.find({
+    createdBy: req.user._id,
+  }).sort({ createdAt: -1 });
 
   res.status(200).json({
     success: true,
     jobs,
   });
 });
-
-export const applyJob = async (req, res) => {
-  const user = await User.findById(req.user._id);
-  const job = await Job.findById(req.params.jobId);
-
-  const match = calculateMatch(user.skills, job.skillsRequired);
-
-  const application = await Application.create({
-    user: user._id,
-    job: job._id,
-    matchPercentage: match.matchPercentage,
-  });
-
-  res.json({
-    success: true,
-    matchPercentage: match.matchPercentage,
-  });
-};
