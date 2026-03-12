@@ -52,11 +52,11 @@ export default function AdminJobs() {
     setCurrentPage(1);
   }, [search]);
 
-  /* ---------------- LOADING (SKELETON) ---------------- */
+  /* ---------------- LOADING ---------------- */
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-6 space-y-4 mt-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-4 mt-8">
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
@@ -78,13 +78,17 @@ export default function AdminJobs() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="max-w-6xl mx-auto px-6 space-y-6 animate-fade-up">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6 animate-fade-up">
+
       {/* HEADER */}
+
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
             Job Openings
           </h1>
+
           <p className="text-sm text-gray-500 mt-1">
             Admin overview of all posted jobs
           </p>
@@ -102,9 +106,11 @@ export default function AdminJobs() {
                        focus:ring-indigo-500 transition"
           />
         </div>
+
       </div>
 
       {/* EMPTY STATE */}
+
       {!jobs.length && (
         <div className="py-20 text-center text-gray-400">
           No jobs created yet
@@ -112,6 +118,7 @@ export default function AdminJobs() {
       )}
 
       {/* SEARCH EMPTY */}
+
       {jobs.length > 0 && !filteredJobs.length && (
         <div className="py-20 text-center text-gray-400">
           No jobs match your search
@@ -119,8 +126,10 @@ export default function AdminJobs() {
       )}
 
       {/* JOB LIST */}
+
       {!!paginatedJobs.length && (
         <div className="space-y-3">
+
           {paginatedJobs.map((job, index) => {
             const applicationCount =
               job.applicationCount ??
@@ -132,25 +141,31 @@ export default function AdminJobs() {
               <div
                 key={job._id}
                 style={{ animationDelay: `${index * 0.05}s` }}
-                className="group flex items-center justify-between
+                className="group flex flex-col sm:flex-row
+                           sm:items-center sm:justify-between
+                           gap-3 sm:gap-0
                            rounded-2xl border border-gray-200 bg-white
-                           px-6 py-5 transition-all
+                           px-4 sm:px-6 py-4 sm:py-5
+                           transition-all
                            hover:shadow-md hover:-translate-y-[2px]
                            animate-fade-up"
               >
+
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                     {job.title}
                   </h3>
+
                   <p className="text-sm text-gray-500">
                     {job.company}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
+
                   <span className="rounded-full bg-gray-100
-                                   px-3 py-1 text-xs font-semibold
-                                   text-gray-700">
+                                   px-2 sm:px-3 py-1 text-xs font-semibold
+                                   text-gray-700 whitespace-nowrap">
                     {applicationCount} Applications
                   </span>
 
@@ -162,7 +177,9 @@ export default function AdminJobs() {
                   >
                     View <span>→</span>
                   </Link>
+
                 </div>
+
               </div>
             );
           })}
@@ -170,8 +187,10 @@ export default function AdminJobs() {
       )}
 
       {/* PAGINATION */}
+
       {totalPages > 1 && (
-        <div className="pt-6 flex justify-center items-center gap-4">
+        <div className="pt-6 flex flex-wrap justify-center items-center gap-3 sm:gap-4">
+
           <button
             onClick={() =>
               setCurrentPage((p) => Math.max(p - 1, 1))
@@ -199,6 +218,7 @@ export default function AdminJobs() {
           >
             Next
           </button>
+
         </div>
       )}
     </div>

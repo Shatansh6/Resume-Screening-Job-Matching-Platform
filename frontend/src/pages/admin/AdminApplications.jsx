@@ -95,7 +95,7 @@ export default function AdminApplications() {
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-4">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-4">
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
@@ -117,10 +117,12 @@ export default function AdminApplications() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-6 space-y-5 animate-fade-up">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-5 animate-fade-up">
+
       {/* HEADER */}
+
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
           Applications
         </h1>
         <p className="text-sm text-gray-500">
@@ -129,28 +131,32 @@ export default function AdminApplications() {
       </div>
 
       {/* SEARCH */}
+
       <div className="sticky top-0 z-10 bg-white pt-4 pb-3 border-b">
         <input
           type="text"
           placeholder="Search by name or email"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:w-80 rounded-lg border border-gray-300
+          className="w-full sm:w-80 rounded-lg border border-gray-300
                      px-4 py-2 text-sm focus:ring-2
                      focus:ring-indigo-500 focus:outline-none"
         />
       </div>
 
       {/* TABLE */}
+
       <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="w-full text-sm text-left">
+        <table className="w-full min-w-[640px] text-sm text-left">
           <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
             <tr>
-              <th className="px-6 py-4">Candidate</th>
-              <th className="px-6 py-4">Experience</th>
-              <th className="px-6 py-4">Match</th>
-              <th className="px-6 py-4">Status</th>
-              <th className="px-6 py-4 text-right">Action</th>
+              <th className="px-4 sm:px-6 py-3 sm:py-4">Candidate</th>
+              <th className="px-4 sm:px-6 py-3 sm:py-4">Experience</th>
+              <th className="px-4 sm:px-6 py-3 sm:py-4">Match</th>
+              <th className="px-4 sm:px-6 py-3 sm:py-4">Status</th>
+              <th className="px-4 sm:px-6 py-3 sm:py-4 text-right">
+                Action
+              </th>
             </tr>
           </thead>
 
@@ -163,7 +169,7 @@ export default function AdminApplications() {
                 className="cursor-pointer border-t hover:bg-gray-50
                            transition animate-fade-up"
               >
-                <td className="px-6 py-4">
+                <td className="px-4 sm:px-6 py-3 sm:py-4">
                   <p className="font-medium text-gray-900">
                     {app.user?.name}
                   </p>
@@ -172,21 +178,21 @@ export default function AdminApplications() {
                   </p>
                 </td>
 
-                <td className="px-6 py-4">
+                <td className="px-4 sm:px-6 py-3 sm:py-4">
                   {app.user?.experience ?? 0} yrs
                 </td>
 
-                <td className="px-6 py-4">
+                <td className="px-4 sm:px-6 py-3 sm:py-4">
                   <span className="rounded-full bg-indigo-100
-                                   px-3 py-1 text-xs font-semibold
+                                   px-2 sm:px-3 py-1 text-xs font-semibold
                                    text-indigo-700">
                     {app.matchPercentage}%
                   </span>
                 </td>
 
-                <td className="px-6 py-4">
+                <td className="px-4 sm:px-6 py-3 sm:py-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadge(
+                    className={`rounded-full px-2 sm:px-3 py-1 text-xs font-semibold ${statusBadge(
                       app.status
                     )}`}
                   >
@@ -195,7 +201,7 @@ export default function AdminApplications() {
                 </td>
 
                 <td
-                  className="px-6 py-4 text-right"
+                  className="px-4 sm:px-6 py-3 sm:py-4 text-right"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <select
@@ -227,8 +233,9 @@ export default function AdminApplications() {
       </div>
 
       {/* PAGINATION */}
+
       {totalPages > 1 && (
-        <div className="pt-6 flex justify-center items-center gap-4">
+        <div className="pt-6 flex flex-wrap justify-center items-center gap-3 sm:gap-4">
           <button
             onClick={() =>
               setCurrentPage((p) => Math.max(p - 1, 1))
@@ -260,16 +267,20 @@ export default function AdminApplications() {
       )}
 
       {/* MODAL */}
+
       {selectedApp && (
         <div className="fixed inset-0 z-50 flex items-center
                         justify-center bg-black/40">
-          <div className="w-full max-w-3xl rounded-xl
+
+          <div className="w-[92%] sm:w-full max-w-3xl rounded-xl
                           bg-white shadow-xl animate-scale-in">
+
             <div className="flex items-center justify-between
-                            border-b px-6 py-4">
+                            border-b px-4 sm:px-6 py-4">
               <h2 className="text-xl font-semibold">
                 Candidate Details
               </h2>
+
               <button
                 onClick={() => setSelectedApp(null)}
                 className="text-gray-400 hover:text-gray-600 text-xl"
@@ -278,7 +289,7 @@ export default function AdminApplications() {
               </button>
             </div>
 
-            <div className="p-6 grid grid-cols-2 gap-6">
+            <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <Info label="Name" value={selectedApp.user?.name} />
               <Info label="Email" value={selectedApp.user?.email} />
               <Info
@@ -291,7 +302,7 @@ export default function AdminApplications() {
               />
             </div>
 
-            <div className="flex justify-end border-t px-6 py-4">
+            <div className="flex justify-end border-t px-4 sm:px-6 py-4">
               <button
                 onClick={() => setSelectedApp(null)}
                 className="rounded-lg border px-4 py-2 text-sm"
@@ -299,6 +310,7 @@ export default function AdminApplications() {
                 Close
               </button>
             </div>
+
           </div>
         </div>
       )}
@@ -306,7 +318,8 @@ export default function AdminApplications() {
   );
 }
 
-/* 🔹 Helper */
+/* Helper */
+
 function Info({ label, value }) {
   return (
     <div>
