@@ -201,11 +201,9 @@ export default function AdminJobs() {
           >
             Prev
           </button>
-
           <span className="text-sm text-gray-600">
             Page {currentPage} of {totalPages}
           </span>
-
           <button
             onClick={() =>
               setCurrentPage((p) =>
@@ -218,7 +216,6 @@ export default function AdminJobs() {
           >
             Next
           </button>
-
         </div>
       )}
     </div>
