@@ -13,7 +13,6 @@ export default function CreateJob() {
     skillsRequired: "",
     description: "",
   });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,7 +32,7 @@ export default function CreateJob() {
       .filter(Boolean);
 
     if (experience < 0) {
-      setError("Experience must be a positive number");
+      setError("Experience must be a positive integer");
       return;
     }
 

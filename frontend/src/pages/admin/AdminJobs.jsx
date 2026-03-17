@@ -20,7 +20,7 @@ export default function AdminJobs() {
         const res = await api.get("/jobs");
         setJobs(res.data.jobs || res.data.data || []);
       } catch {
-        setError("Failed to load jobs");
+        setError("Failed to the load jobs");
       } finally {
         setLoading(false);
       }
