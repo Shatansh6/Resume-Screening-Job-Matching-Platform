@@ -1,24 +1,70 @@
+# ----------------------
+# Node modules
+# ----------------------
+node_modules/
+**/node_modules/
+
+# ----------------------
+# Environment variables
+# ----------------------
+.env
+**/.env
+
+# ----------------------
 # Logs
-logs
+# ----------------------
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# ----------------------
+# OS files
+# ----------------------
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+
+# ----------------------
+# Build / dist folders
+# ----------------------
+dist/
+build/
+out/
+
+# ----------------------
+# Vite specific
+# ----------------------
+frontend/dist/
+
+# ----------------------
+# Uploads (your backend folder)
+# ----------------------
+Backend/uploads/
+
+# ----------------------
+# Cache / temp
+# ----------------------
+.cache/
+.tmp/
+.temp/
+
+# ----------------------
+# IDE / Editor
+# ----------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ----------------------
+# Misc
+# ----------------------
+coverage/
+*.pid
+*.seed
+
+node_modules/
+**/node_modules/
+.env
+**/.env
